@@ -1,0 +1,10 @@
+SetEnv TZ Asia/Kolkata
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]
+RewriteCond %{HTTP:token_code} ^(.*)
+RewriteRule .* - [e=HTTP_TOKEN_CODE:%1]
+php_value post_max_size 2G
+php_value upload_max_filesize 2G
+php_value max_execution_time 120
