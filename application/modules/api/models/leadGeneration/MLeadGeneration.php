@@ -160,12 +160,11 @@ class mLeadGeneration extends CI_Model
             $data = $this->db->get_where("lead", ['lead_id' => $id])->row_array();
         } else {
             if (!empty($id['created_by'])) {
-            $this->db->select('sealesman_id	');
-            $this->db->from('technial_salesman_relation', NULL, FALSE);
-            $this->db->where('technical_id', $id['created_by']);
-            $sealsmanId = $this->db->get()->row();
-            $sealsmanId=explode(",",$sealsmanId->sealesman_id); 
-
+                $this->db->select('sealesman_id');
+                $this->db->from('technial_salesman_relation', NULL, FALSE);
+                $this->db->where('technical_id', $id['created_by']);
+                $sealsmanId = $this->db->get()->row();
+                $sealsmanId = explode(',', $sealsmanId->sealesman_id);
             }
             $this->db->select('l.*,a.asset_name,a.asset_id,a.asset_type,a.is_active');
             $this->db->from('lead l', NULL, FALSE);
@@ -192,48 +191,64 @@ class mLeadGeneration extends CI_Model
      */
     public function getReportData($id)
     {
-        if (is_numeric($id)) {
-            $data = $this->db->get_where("lead", ['lead_id' => $id])->row_array();
-        } else {
-            $this->db->order_by('lead_id', 'DESC');
-            $data = $this->db->get("lead")->result();
-            $leadIDs = array();
-            foreach ($data as $key) {
-                array_push($leadIDs, $key->lead_id);
-            }
-            $this->db->where_in('lead_id', $leadIDs);
-            $this->db->where('is_active', 1);
-            $data1 = $this->db->get("quotation_assets")->result();
-            foreach ($data as $key) {
-                foreach ($data1 as $key1) {
-                    if ($key->lead_id === $key1->lead_id) {
-                        $key->asset_name = $key1->asset_name;
-                        $key->is_active = $key1->is_active;
-                        $key->asset_type = $key1->asset_type;
-                        $key->total_area = $key1->total_area;
-                        $key->total_unit = $key1->total_unit;
-                        $key->average_price = $key1->average_price;
-                    }
-                }
-            }
-            $this->db->where_in('lead_id', $leadIDs);
-            $this->db->select('COUNT(lead_id) as offer_count,lead_id,offer_price,gst,freight');
-            $data1 = $this->db->get("offer_details")->result();
-            foreach ($data as $key) {
-                foreach ($data1 as $key1) {
-                    if ($key->lead_id === $key1->lead_id) {
-                        $key->offer_price = $key1->offer_price;
-                        $key->gst = $key1->gst;
-                        $key->freight = $key1->freight;
-                        $key->offer_count = $key1->offer_count;
-                    }
-                }
-            }
-        }
+
+        // if (is_numeric($id)) {
+        //     $data = $this->db->get_where("lead", ['lead_id' => $id])->row_array();
+        // } else {
+        //     $this->db->order_by('lead_id', 'DESC');
+        //     $data = $this->db->get("lead")->result();
+        //     $leadIDs = array();
+        //     foreach ($data as $key) {
+        //         array_push($leadIDs, $key->lead_id);
+        //     }
+        //     $this->db->where_in('lead_id', $leadIDs);
+        //     $this->db->where('is_active', 1);
+        //     $data1 = $this->db->get("quotation_assets")->result();
+        //     foreach ($data as $key) {
+        //         foreach ($data1 as $key1) {
+        //             if ($key->lead_id === $key1->lead_id) {
+        //                 $key->asset_name = $key1->asset_name;
+        //                 $key->is_active = $key1->is_active;
+        //                 $key->asset_type = $key1->asset_type;
+        //                 $key->total_area = $key1->total_area;
+        //                 $key->total_unit = $key1->total_unit;
+        //                 $key->average_price = $key1->average_price;
+        //             }
+        //         }
+        //     }
+        //     $this->db->where_in('lead_id', $leadIDs);
+        //     $this->db->select('COUNT(lead_id) as offer_count,lead_id,offer_price,gst,freight');
+        //     $data1 = $this->db->get("offer_details")->result();
+        //     foreach ($data as $key) {
+        //         foreach ($data1 as $key1) {
+        //             if ($key->lead_id === $key1->lead_id) {
+        //                 $key->offer_price = $key1->offer_price;
+        //                 $key->gst = $key1->gst;
+        //                 $key->freight = $key1->freight;
+        //                 $key->offer_count = $key1->offer_count;
+        //             }
+        //         }
+        //     }
+        // }
+        // if (!empty($data)) {
+        //     $response['status'] = TRUE;
+        //     $response['data'] = $data;
+        // } else {
+        //     $response['error'] = 'No record found';
+        // }
+        // return $response;
+
+        // $data = $this->db->get_where("auth_user", ['user_role' => 'sealseman'])->result();
+        $this->db->select('au.*,l.*');
+        $this->db->from('auth_user au', null, false);
+        $this->db->join('lead l', 'au.user_id=l.created_by', null, false);
+        $this->db->where('au.user_role', 'sealseman');
+        $data = $this->db->get()->result();
         if (!empty($data)) {
             $response['status'] = TRUE;
             $response['data'] = $data;
         } else {
+            $response['status'] = FALSE;
             $response['error'] = 'No record found';
         }
         return $response;

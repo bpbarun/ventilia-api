@@ -527,7 +527,7 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 	{
 		if ($type !== '')
 		{
-			$type = strtoupper(trim($type));
+			$type = strtoupper($type ?? '');
 
 			if ( ! in_array($type, array('LEFT', 'RIGHT', 'OUTER', 'INNER', 'LEFT OUTER', 'RIGHT OUTER'), TRUE))
 			{
@@ -2781,7 +2781,6 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 			'qb_offset'		=> FALSE
 		));
 	}
-
 	// --------------------------------------------------------------------
 
 	/**
