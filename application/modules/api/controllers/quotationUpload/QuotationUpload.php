@@ -1,5 +1,6 @@
 <?php
 header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: *');
 
 require APPPATH . 'libraries/REST_Controller.php';
 /**
@@ -68,17 +69,7 @@ class QuotationUpload extends REST_Controller
         if (empty($responseData['error'])) {
             $input = $this->post();
             try {
-                // $config = json_decode(file_get_contents(FRONT_URL . "/login/config.json"));
-                // if (isset($config->{'media'}->{'directory'}) && isset($_FILES["file"])) {
-                // $mediaDirectory = '/var/www/demo/university-media' . '/' . $input['activity_id'];
-                // $mediaDirectory = $config->{'media'}->{'directory'} . '/' . $input['activity_id'];
                 $mediaDirectory = '/var/www/html/lead/';
-                print_r($input);
-                // if (!is_dir($mediaDirectory)) {
-                //    exec(mkdir($mediaDirectory));
-                //     exec(chmod($mediaDirectory, 0777));
-                // }
-                print_r($_FILES);
                 $mediaName = $_FILES["file"]["name"];
                 // $mediaName = $this->security->sanitize_filename($_FILES["file"]["name"]);
                 $indexOFF  = strrpos($mediaName, '.');
@@ -87,9 +78,6 @@ class QuotationUpload extends REST_Controller
                 $extension = substr($mediaName, $indexOFF);
                 $clean     = preg_replace("([^\w\s\d\-_])", "", $nameFile);
                 $mediaName  = str_replace(' ', '', $clean) . $extension;
-                // move_uploaded_file($_FILES["file"]["tmp_name"], $mediaDirectory . '/' . $mediaName);
-                // $mailBody = "UPLOAD FILE \n:\n " . print_r($input, true) . " \n::\n " . print_r($_FILES["file"], true) . " \n::\n " . print_r(scandir(str_replace(basename($_FILES["file"]["tmp_name"]), '', $_FILES["file"]["tmp_name"])), 1);
-                // error_log($mailBody);
                 if (empty($_FILES["file"]["type"]) || !move_uploaded_file($_FILES["file"]["tmp_name"], $mediaDirectory . '/' . $mediaName)) {
                     //     $subject  = 'Attachment Issue';
                     //     $this->notificationSend->sendIssueMail($subject, str_replace("\n", '<br>', $mailBody));

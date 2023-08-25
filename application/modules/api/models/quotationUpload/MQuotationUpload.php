@@ -72,6 +72,9 @@ class mQuotationUpload extends CI_Model
      */
     public function updateData($id, $input)
     {
+        if (isset($input['set_opportunity'])) {
+            $this->db->update('quotation_assets', array('set_opportunity' => 0, 'is_active' => 0), array('lead_id' => $input['lead_id']));
+        }
         $data = $this->db->update('quotation_assets', $input, array('quotation_asset_id' => $id));
         if ($this->db->affected_rows() > 0) {
             $response['status'] = TRUE;
@@ -112,6 +115,7 @@ class mQuotationUpload extends CI_Model
             $id = $this->db->insert_id();
             $q = $this->db->get_where('quotation_assets', array('quotation_asset_id' => $id));
             $response['data'] = $q->row();
+            $this->db->update('lead', array('lead_progress'=>2), array('lead_id' => $input['lead_id']));
         } else {
             $response['error'] = 'Getting error please try after some time';
         }

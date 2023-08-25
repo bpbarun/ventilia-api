@@ -12,21 +12,24 @@ require APPPATH . 'libraries/REST_Controller.php';
  * @date            19 August, 2019, 7:00:00 PM
  * @version         1.0.0
  */
-class User extends REST_Controller {
+class User extends REST_Controller
+{
 
     /**
      * Get All Data from this method.
      *
      * @return Response
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->load->database();
         $this->load->model('user/mUser');
         $response = array('status' => FALSE, 'error' => '', 'data' => array(), 'response_tag' => 220);
     }
 
-    public function index() {
+    public function index()
+    {
         echo "called index function";
     }
 
@@ -35,7 +38,8 @@ class User extends REST_Controller {
      *
      * @return Response
      */
-    public function index_get($id = 0) {
+    public function index_get($id = 0)
+    {
 
         $headerData = $this->input->request_headers();
         $responseData = $this->common->authCheck($headerData);
@@ -57,7 +61,8 @@ class User extends REST_Controller {
      *
      * @return Response
      */
-    public function index_post() {
+    public function index_post()
+    {
         $headerData = $this->input->request_headers();
         $responseData = $this->common->authCheck($headerData);
         if (empty($responseData['error'])) {
@@ -74,7 +79,8 @@ class User extends REST_Controller {
      *
      * @return Response
      */
-    public function index_put($id) {
+    public function index_put($id)
+    {
         $headerData = $this->input->request_headers();
         $responseData = $this->common->authCheck($headerData);
         if (empty($responseData['error'])) {
@@ -91,7 +97,8 @@ class User extends REST_Controller {
      *
      * @return Response
      */
-    public function index_delete($id) {
+    public function index_delete($id)
+    {
         $headerData = $this->input->request_headers();
         $responseData = $this->common->authCheck($headerData);
         if (empty($responseData['error'])) {
@@ -102,5 +109,22 @@ class User extends REST_Controller {
             $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
         }
     }
+    /**
+     * Upload the files from this method
+     * 
+     * @return Response
+     */
+    public function technicalsidebar_get()
+    {
+        $headerData = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (empty($responseData['error'])) {
 
+            $response = $this->mUser->technicalsidebar();
+
+            $this->response($response, REST_Controller::HTTP_OK);
+        } else {
+            $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+    }
 }
