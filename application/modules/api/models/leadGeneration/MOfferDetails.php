@@ -30,7 +30,7 @@ class mOfferDetails extends CI_Model
     public function getData($id)
     {
         if (!empty($id)) {
-            $data = $this->db->get_where("offer_details", ['lead_id' => $id,'is_active' => 0])->result();
+            $data = $this->db->get_where("offer_details", ['lead_id' => $id, 'is_active' => 0])->result();
         } else {
             $this->db->order_by('offer_id', 'DESC');
             $data = $this->db->get("offer_details")->result();
@@ -63,6 +63,17 @@ class mOfferDetails extends CI_Model
             $response['data'] = $q->row();
         } else {
             $response['error'] = 'Getting error please try after some time';
+        }
+        if (isset($input['lead_id'])) {
+            $this->db->select("COUNT(*) as count");
+            $this->db->from('offer_details');
+            $this->db->where('lead_id', $input['lead_id']);
+            $offerData = $this->db->get()->row_array();
+            if ($offerData['count'] == 1) {
+                $this->db->update('lead', array('lead_progress' => 3), array('lead_id' => $input['lead_id']));
+            } else if ($offerData['count'] > 1) {
+                $this->db->update('lead', array('lead_progress' => 4), array('lead_id' => $input['lead_id']));
+            }
         }
         return $response;
     }

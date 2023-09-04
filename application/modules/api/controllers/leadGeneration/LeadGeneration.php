@@ -174,7 +174,7 @@ class LeadGeneration extends REST_Controller
             $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
         }
     }
-     /**
+    /**
      * Get All Opportunity Data from this method.
      *
      * @return Response
@@ -217,4 +217,77 @@ class LeadGeneration extends REST_Controller
             $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
         }
     }
+    /**
+     * Get All Data from this method.
+     *
+     * @return Response
+     */
+    public function getUseLeadData_get($id)
+    {
+
+        $headerData = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (empty($responseData['error'])) {
+            if (!empty($id)) {
+                $response = $this->mLeadGeneration->getUseLeadData($id);
+            } else {
+                $response = array('status' => false, 'error' => 'Please send userId');
+            }
+            $this->response($response, REST_Controller::HTTP_OK);
+        } else {
+            $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+    }
+    /**
+     * Get All Data from this method.
+     *
+     * @return Response
+     */
+    public function getGrapgData_get($id = 0)
+    {
+        $headerData = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (empty($responseData['error'])) {
+            $response = $this->mLeadGeneration->getGrapgData($id);
+
+            $this->response($response, REST_Controller::HTTP_OK);
+        } else {
+            $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+    }
+    /**
+     * Get All Data from this method.
+     *
+     * @return Response
+     */
+    public function getCancelLead_get($id = 0)
+    {
+        $headerData = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (empty($responseData['error'])) {
+            $response = $this->mLeadGeneration->getCancelLead($id);
+
+            $this->response($response, REST_Controller::HTTP_OK);
+        } else {
+            $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+    }
+     /**
+     * Get All Data from this method.
+     *
+     * @return Response
+     */
+    public function getCompletedLead_get($id = 0)
+    {
+        $headerData = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (empty($responseData['error'])) {
+            $response = $this->mLeadGeneration->getCompletedLead($id);
+
+            $this->response($response, REST_Controller::HTTP_OK);
+        } else {
+            $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+    }
+    
 }
