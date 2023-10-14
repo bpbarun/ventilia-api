@@ -114,13 +114,13 @@ class User extends REST_Controller
      * 
      * @return Response
      */
-    public function technicalsidebar_get()
+    public function technicalsidebar_get($id)
     {
         $headerData = $this->input->request_headers();
         $responseData = $this->common->authCheck($headerData);
         if (empty($responseData['error'])) {
 
-            $response = $this->mUser->technicalsidebar();
+            $response = $this->mUser->technicalsidebar($id);
 
             $this->response($response, REST_Controller::HTTP_OK);
         } else {

@@ -101,10 +101,11 @@ class mUser extends CI_Model
      *
      * @return Response
      */
-    public function technicalsidebar()
+    public function technicalsidebar($id)
     {
         $qry =  "SELECT u.user_name,u.user_id from auth_user as u 
-        JOIN technial_salesman_relation as r on find_in_set(u.user_id,r.sealesman_id)";
+        JOIN technial_salesman_relation as r on find_in_set(u.user_id,r.sealesman_id) 
+        where r.technical_id = $id";
         $query = $this->db->query($qry);
         $data  = $query->result();
         if ($data) {

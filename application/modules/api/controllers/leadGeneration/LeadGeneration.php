@@ -2,8 +2,6 @@
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: *');
 
-
-
 require APPPATH . 'libraries/REST_Controller.php';
 /**
  * This class is used for Crud operation over leadGeneration
@@ -72,7 +70,18 @@ class LeadGeneration extends REST_Controller
         if (empty($responseData['error'])) {
             $input = $this->post();
             $input['created_by'] = $responseData['data']['id'];
+            if (isset($input['comment'])) {
+                $commentData = $input['comment'];
+                unset($input['comment']);
+            }
             $response = $this->mLeadGeneration->insertData($input);
+            if ($commentData) {
+                $commentInput = array('comment' => $commentData,
+                 'lead_id' => $response['data']->lead_id,
+                'created_by'=>$responseData['data']['id']);
+                $this->load->model('leadGeneration/mComment');
+                $this->mComment->insertData($commentInput);
+            }
             $this->response($response, REST_Controller::HTTP_OK);
         } else {
             $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
@@ -272,7 +281,7 @@ class LeadGeneration extends REST_Controller
             $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
         }
     }
-     /**
+    /**
      * Get All Data from this method.
      *
      * @return Response
@@ -289,5 +298,20 @@ class LeadGeneration extends REST_Controller
             $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
         }
     }
-    
+     /**
+     * Get All Data from this method.
+     *
+     * @return Response
+     */
+    public function getLeadAssets_get($id = 0)
+    {
+        $headerData = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (empty($responseData['error'])) {
+            $response = $this->mLeadGeneration->getLeadAssets($id);
+            $this->response($response, REST_Controller::HTTP_OK);
+        } else {
+            $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+    }
 }

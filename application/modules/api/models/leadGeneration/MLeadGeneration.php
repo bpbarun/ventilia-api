@@ -34,6 +34,7 @@ class mLeadGeneration extends CI_Model
         } else {
             $this->db->order_by('lead_id', 'DESC');
             $this->db->where('is_active', 1);
+            $this->db->where('lead_progress <=', 1);
             $this->db->where('created_by', $id['created_by']);
             $data = $this->db->get("lead")->result();
             $leadIDs = array();
@@ -196,7 +197,10 @@ class mLeadGeneration extends CI_Model
     public function insertAssetsData($input)
     {
         if (isset($input['lead_id'])) {
-            $this->db->update('lead_assets', array('is_active' => 0), array('lead_id' => $input['lead_id']));
+            $this->db->update('lead_assets', array('is_active' => 0), array(
+                'lead_id' => $input['lead_id'],
+                'random_no !=' => $input['random_no']
+            ));
         }
         $data = $this->db->insert('lead_assets', $input);
         if (!empty($data)) {
@@ -219,10 +223,8 @@ class mLeadGeneration extends CI_Model
     public function getQuotationLead($id)
     {
         if (is_numeric($id)) {
-            $this->db->select('l.*,a.asset_name,a.asset_id,a.asset_type,a.is_active');
+            $this->db->select('l.*');
             $this->db->from('lead l', NULL, FALSE);
-            $this->db->join('lead_assets a', 'l.lead_id=a.lead_id', NULL, FALSE);
-            $this->db->where('a.is_active', 1);
             $this->db->where_in('l.created_by', $id);
             $this->db->where_in('l.lead_progress', 1);
             $this->db->order_by('l.lead_id', 'ASC');
@@ -235,10 +237,8 @@ class mLeadGeneration extends CI_Model
                 $sealsmanId = $this->db->get()->row();
                 $sealsmanId = explode(',', $sealsmanId->sealesman_id);
             }
-            $this->db->select('l.*,a.asset_name,a.asset_id,a.asset_type,a.is_active');
+            $this->db->select('l.*');
             $this->db->from('lead l', NULL, FALSE);
-            $this->db->join('lead_assets a', 'l.lead_id=a.lead_id', NULL, FALSE);
-            $this->db->where('a.is_active', 1);
             $this->db->where_in('l.created_by', $sealsmanId);
             $this->db->order_by('l.lead_id', 'ASC');
             $data = $this->db->get()->result();
@@ -287,19 +287,19 @@ class mLeadGeneration extends CI_Model
                     if ($n == $data[$j]->user_id && $data[$j]->is_active == 1) {
                         $l = $l + 1;
                     }
-                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 0) {
+                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 0 && $data[$j]->is_active == 1) {
                         $tenPer = $tenPer + 1;
                     }
-                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 1) {
+                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 1 && $data[$j]->is_active == 1) {
                         $twentyPer = $twentyPer + 1;
                     }
-                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 2) {
+                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 2 && $data[$j]->is_active == 1) {
                         $fortyPer = $fortyPer + 1;
                     }
-                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 3) {
+                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 3 && $data[$j]->is_active == 1) {
                         $sixtyPer = $sixtyPer + 1;
                     }
-                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 4) {
+                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 4 && $data[$j]->is_active == 1) {
                         $eightyPer = $eightyPer + 1;
                     }
                 }
@@ -417,22 +417,20 @@ class mLeadGeneration extends CI_Model
         $completedLead = 0;
         $cancelLead = 0;
 
-
-
         foreach ($data as $key) {
-            if ($key->lead_progress == 0) {
+            if ($key->lead_progress == 0 && $key->is_active == 1) {
                 $ten = $ten + 1;
             }
-            if ($key->lead_progress == 1) {
+            if ($key->lead_progress == 1 && $key->is_active == 1) {
                 $twenty = $twenty + 1;
             }
-            if ($key->lead_progress == 2) {
+            if ($key->lead_progress == 2 && $key->is_active == 1) {
                 $forty = $forty + 1;
             }
-            if ($key->lead_progress == 3) {
+            if ($key->lead_progress == 3 && $key->is_active == 1) {
                 $sixty = $sixty + 1;
             }
-            if ($key->lead_progress == 4) {
+            if ($key->lead_progress == 4 && $key->is_active == 1) {
                 $eighty = $eighty + 1;
             }
             if ($key->is_active == 1) {
@@ -469,7 +467,7 @@ class mLeadGeneration extends CI_Model
         if (!empty($id)) {
             $data = $this->db->get_where("lead", ['created_by' => $id, 'is_active' => 3])->result();
         } else {
-            $data = $this->db->get("lead", ['is_active' => 3])->result();
+            $data = $this->db->get_where("lead", ['is_active' => 3])->result();
         }
         if (!empty($data)) {
             $response['status'] = TRUE;
@@ -490,7 +488,24 @@ class mLeadGeneration extends CI_Model
         if (!empty($id)) {
             $data = $this->db->get_where("lead", ['created_by' => $id, 'is_active' => 2])->result();
         } else {
-            $data = $this->db->get("lead", ['is_active' => 2])->result();
+            $data = $this->db->get_where("lead", ['is_active' => 2])->result();
+        }
+        if (!empty($data)) {
+            $response['status'] = TRUE;
+            $response['data'] = $data;
+        } else {
+            $response['status'] = FALSE;
+            $response['error'] = 'No record found';
+        }
+        return $response;
+    }
+    public function getLeadAssets($id){
+        if (!empty($id)) {
+            $this->db->order_by('asset_id', 'DESC');
+            $data = $this->db->get_where("lead_assets", ['lead_id' => $id,'is_active'=>1])->result();
+        } else {
+            $this->db->order_by('asset_id', 'DESC');
+            $data = $this->db->get("lead_assets")->result();
         }
         if (!empty($data)) {
             $response['status'] = TRUE;

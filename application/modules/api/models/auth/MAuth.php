@@ -8,7 +8,7 @@ header("Access-Control-Allow-Methods: *");
 /**
  * This class is used for Crud operation over report 
  *
- * @package         Lentelia
+ * @package         Ventelia
  * @subpackage      Model/api/auth
  * @category        common to all
  * @author          Barun Pandey
