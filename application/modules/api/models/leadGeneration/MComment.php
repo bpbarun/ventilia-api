@@ -30,7 +30,14 @@ class mComment extends CI_Model
     public function getData($id)
     {
         if (!empty($id)) {
-            $data = $this->db->get_where("comment", ['lead_id' => $id])->result();
+            // $data = $this->db->get_where("comment", ['lead_id' => $id])->result();
+            $this->db->select('c.*,u.user_id,u.user_name');
+            $this->db->from('comment c', NULL, FALSE);
+            $this->db->join('`auth_user` `u`', 'u.user_id=c.created_by', NULL, FALSE);
+            $this->db->where('c.lead_id', $id);
+            $this->db->order_by('c.created_on', 'ASC');
+            $data = $this->db->get()->result();
+
         } else {
             $this->db->order_by('comment_id', 'ASC');
             $data = $this->db->get("comment")->result();

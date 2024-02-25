@@ -143,6 +143,7 @@ class LeadGeneration extends REST_Controller
                 $clean     = preg_replace("([^\w\s\d\-_])", "", $nameFile);
                 $mediaName  = str_replace(' ', '', $clean) . $extension;
                 if (empty($_FILES["file"]["type"]) || !move_uploaded_file($_FILES["file"]["tmp_name"], $mediaDirectory . '/' . $mediaName)) {
+                    echo "error";
                     //     $subject  = 'Attachment Issue';
                     //     $this->notificationSend->sendIssueMail($subject, str_replace("\n", '<br>', $mailBody));
                     //     $response = array('status' => FALSE, 'error' => $subject);

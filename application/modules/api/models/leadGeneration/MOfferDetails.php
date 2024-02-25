@@ -111,4 +111,22 @@ class mOfferDetails extends CI_Model
         }
         return $response;
     }
+    public function offerLetterData($id){
+        $this->db->select('o.*,q.*');
+        $this->db->from('offer_details o', NULL, FALSE);
+        $this->db->join('`quotation_assets` `q`', 'o.lead_id=q.lead_id', NULL, FALSE);
+        $this->db->where('o.is_active', '1');
+        $this->db->where('q.is_active', '1');
+        $this->db->where('o.lead_id', $id);
+
+        $data = $this->db->get()->result();
+        if (!empty($data)) {
+            $response['status'] = TRUE;
+            $response['data'] = $data;
+        } else {
+            $response['status'] = FALSE;
+            $response['error'] = 'No record found';
+        }
+        return $response;
+    }
 }
