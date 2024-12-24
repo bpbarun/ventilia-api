@@ -260,59 +260,124 @@ class mLeadGeneration extends CI_Model
      */
     public function getReportData($id)
     {
-        $this->db->select('au.user_name,au.user_id,l.lead_id,l.is_active,l.lead_progress');
-        $this->db->from('auth_user au', NULL, FALSE);
-        $this->db->join('`lead` `l`', 'au.user_id=l.created_by', NULL, FALSE);
-        $this->db->where('au.user_role', 'sealseman');
-        $this->db->order_by('au.user_id', 'ASC');
-        $data = $this->db->get()->result();
-        // echo $this->db->last_query();
-        $k = 0;
-        $n = 0;
-        $newData = array();
-        for ($i = 0; $i < count($data); $i++) {
-            if ($n != $data[$i]->user_id) {
-                $n = $data[$i]->user_id;
-                $k = 0;
-                $l = 0;
-                $tenPer = 0;
-                $twentyPer = 0;
-                $fortyPer = 0;
-                $sixtyPer = 0;
-                $eightyPer = 0;
-                for ($j = 0; $j < count($data); $j++) {
-                    if ($n == $data[$j]->user_id) {
-                        $k = $k + 1;
+        if (is_numeric($id)) {
+            $teamLead = $this->db->get_where("teamlead_salesman_relation", ['teamlead_id' => $id])->row_array();
+            $idArray = explode(',', $teamLead['sealesman_id']);
+            // Convert the array elements to integers
+            $idArray = array_map('intval', $idArray);
+
+            $this->db->select('au.user_name,au.user_id,l.lead_id,l.is_active,l.lead_progress');
+            $this->db->from('auth_user au', NULL, FALSE);
+            $this->db->join('`lead` `l`', 'au.user_id=l.created_by', "LEFT", FALSE);
+            $this->db->where_in('au.user_id', $idArray);
+            $this->db->order_by('au.user_id', 'ASC');
+            $data = $this->db->get()->result();
+            // echo "inside if".$this->db->last_query();
+            $k = 0;
+            $n = 0;
+            $newData = array();
+            for ($i = 0; $i < count($data); $i++) {
+                if ($n != $data[$i]->user_id) {
+                    $n = $data[$i]->user_id;
+                    $k = 0;
+                    $l = 0;
+                    $tenPer = 0;
+                    $twentyPer = 0;
+                    $fortyPer = 0;
+                    $sixtyPer = 0;
+                    $eightyPer = 0;
+                    for ($j = 0; $j < count($data); $j++) {
+                        if ($n == $data[$j]->user_id) {
+                            $k = $k + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->is_active == 1) {
+                            $l = $l + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 0 && $data[$j]->is_active == 1) {
+                            $tenPer = $tenPer + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 1 && $data[$j]->is_active == 1) {
+                            $twentyPer = $twentyPer + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 2 && $data[$j]->is_active == 1) {
+                            $fortyPer = $fortyPer + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 3 && $data[$j]->is_active == 1) {
+                            $sixtyPer = $sixtyPer + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 4 && $data[$j]->is_active == 1) {
+                            $eightyPer = $eightyPer + 1;
+                        }
                     }
-                    if ($n == $data[$j]->user_id && $data[$j]->is_active == 1) {
-                        $l = $l + 1;
-                    }
-                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 0 && $data[$j]->is_active == 1) {
-                        $tenPer = $tenPer + 1;
-                    }
-                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 1 && $data[$j]->is_active == 1) {
-                        $twentyPer = $twentyPer + 1;
-                    }
-                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 2 && $data[$j]->is_active == 1) {
-                        $fortyPer = $fortyPer + 1;
-                    }
-                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 3 && $data[$j]->is_active == 1) {
-                        $sixtyPer = $sixtyPer + 1;
-                    }
-                    if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 4 && $data[$j]->is_active == 1) {
-                        $eightyPer = $eightyPer + 1;
-                    }
+                    $newData[] = array(
+                        'user_id' => $n, 'user_name' => $data[$i]->user_name,
+                        'total_lead' => $k,
+                        'active_lead' => $l,
+                        'tenPer' => $tenPer,
+                        'twentyPer' => $twentyPer,
+                        'fortyPer' => $fortyPer,
+                        'sixtyPer' => $sixtyPer,
+                        'eightyPer' => $eightyPer,
+                    );
                 }
-                $newData[] = array(
-                    'user_id' => $n, 'user_name' => $data[$i]->user_name,
-                    'total_lead' => $k,
-                    'active_lead' => $l,
-                    'tenPer' => $tenPer,
-                    'twentyPer' => $twentyPer,
-                    'fortyPer' => $fortyPer,
-                    'sixtyPer' => $sixtyPer,
-                    'eightyPer' => $eightyPer,
-                );
+            }
+        }
+        else
+        {
+            $this->db->select('au.user_name,au.user_id,l.lead_id,l.is_active,l.lead_progress');
+            $this->db->from('auth_user au', NULL, FALSE);
+            $this->db->join('`lead` `l`', 'au.user_id=l.created_by', NULL, FALSE);
+            $this->db->where('au.user_role', 'sealseman');
+            $this->db->order_by('au.user_id', 'ASC');
+            $data = $this->db->get()->result();
+            // echo "inside else".$this->db->last_query();
+            $k = 0;
+            $n = 0;
+            $newData = array();
+            for ($i = 0; $i < count($data); $i++) {
+                if ($n != $data[$i]->user_id) {
+                    $n = $data[$i]->user_id;
+                    $k = 0;
+                    $l = 0;
+                    $tenPer = 0;
+                    $twentyPer = 0;
+                    $fortyPer = 0;
+                    $sixtyPer = 0;
+                    $eightyPer = 0;
+                    for ($j = 0; $j < count($data); $j++) {
+                        if ($n == $data[$j]->user_id) {
+                            $k = $k + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->is_active == 1) {
+                            $l = $l + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 0 && $data[$j]->is_active == 1) {
+                            $tenPer = $tenPer + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 1 && $data[$j]->is_active == 1) {
+                            $twentyPer = $twentyPer + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 2 && $data[$j]->is_active == 1) {
+                            $fortyPer = $fortyPer + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 3 && $data[$j]->is_active == 1) {
+                            $sixtyPer = $sixtyPer + 1;
+                        }
+                        if ($n == $data[$j]->user_id && $data[$j]->lead_progress == 4 && $data[$j]->is_active == 1) {
+                            $eightyPer = $eightyPer + 1;
+                        }
+                    }
+                    $newData[] = array(
+                        'user_id' => $n, 'user_name' => $data[$i]->user_name,
+                        'total_lead' => $k,
+                        'active_lead' => $l,
+                        'tenPer' => $tenPer,
+                        'twentyPer' => $twentyPer,
+                        'fortyPer' => $fortyPer,
+                        'sixtyPer' => $sixtyPer,
+                        'eightyPer' => $eightyPer,
+                    );
+                }
             }
         }
         if (!empty($data)) {
@@ -403,6 +468,73 @@ class mLeadGeneration extends CI_Model
     {
         if (!empty($id)) {
             $data = $this->db->get_where("lead", ['created_by' => $id])->result();
+            $teamLead = $this->db->get_where("teamlead_salesman_relation", ['teamlead_id' => $id])->row_array(); 
+            $idArray = explode(',', $teamLead['sealesman_id']);
+            // // Convert the array elements to integers
+            $idArray = array_map('intval', $idArray);
+            // $data = $this->db->get_where("lead", ['created_by' => "in($idArray)"])->result();
+
+            $this->db->where_in('created_by', $idArray);
+            $data = $this->db->get("lead")->result();
+            // echo "inside if".$this->db->last_query();
+        } else {
+            $data = $this->db->get("lead")->result();
+        }
+        $graph = array();
+        $tiles = array();
+        $ten = 0;
+        $twenty = 0;
+        $forty = 0;
+        $sixty = 0;
+        $eighty = 0;
+        $activeLeadd = 0;
+        $completedLead = 0;
+        $cancelLead = 0;
+
+        foreach ($data as $key) {
+            if ($key->lead_progress == 0 && $key->is_active == 1) {
+                $ten = $ten + 1;
+            }
+            if ($key->lead_progress == 1 && $key->is_active == 1) {
+                $twenty = $twenty + 1;
+            }
+            if ($key->lead_progress == 2 && $key->is_active == 1) {
+                $forty = $forty + 1;
+            }
+            if ($key->lead_progress == 3 && $key->is_active == 1) {
+                $sixty = $sixty + 1;
+            }
+            if ($key->lead_progress == 4 && $key->is_active == 1) {
+                $eighty = $eighty + 1;
+            }
+            if ($key->is_active == 1) {
+                $activeLeadd = $activeLeadd + 1;
+            }
+            if ($key->is_active == 3) {
+                $completedLead = $completedLead + 1;
+            }
+            if ($key->is_active == 2) {
+                $cancelLead = $cancelLead + 1;
+            }
+            $graph = array($ten, $twenty, $forty, $sixty, $eighty);
+            $tiles['total_lead'] = COUNT($data);
+            $tiles['completed_lead'] = $completedLead;
+            $tiles['active_lead'] = $activeLeadd;
+            $tiles['cancel_lead'] = $cancelLead;
+        }
+        if (!empty($data)) {
+            $response['status'] = TRUE;
+            $response['data'] = array('graph' => $graph, 'tiles' => $tiles);
+        } else {
+            $response['status'] = FALSE;
+            $response['error'] = 'No record found';
+        }
+        return $response;
+    }
+    public function getMyGraphData($id)
+    {
+        if (!empty($id)) {
+            $data = $this->db->get_where("lead", ['created_by' => $id])->result();
         } else {
             $data = $this->db->get("lead")->result();
         }
@@ -465,9 +597,20 @@ class mLeadGeneration extends CI_Model
     public function getCompletedLead($id)
     {
         if (!empty($id)) {
-            $data = $this->db->get_where("lead", ['created_by' => $id, 'is_active' => 3])->result();
+            // $data = $this->db->get_where("lead", ['created_by' => $id, 'is_active' => 3])->result();
+            $this->db->select('au.user_name,au.user_id,l.*');
+            $this->db->from('auth_user au', NULL, FALSE);
+            $this->db->join('`lead` `l`', 'au.user_id=l.created_by', NULL, FALSE);
+            $this->db->where('l.is_active', 3);
+            $this->db->where('l.created_by', $id);
+            $data = $this->db->get()->result();
         } else {
-            $data = $this->db->get_where("lead", ['is_active' => 3])->result();
+            // $data = $this->db->get_where("lead", ['is_active' => 3])->result();
+            $this->db->select('au.user_name,au.user_id,l.*');
+            $this->db->from('auth_user au', NULL, FALSE);
+            $this->db->join('`lead` `l`', 'au.user_id=l.created_by', NULL, FALSE);
+            $this->db->where('l.is_active', 3);
+            $data = $this->db->get()->result();
         }
         if (!empty($data)) {
             $response['status'] = TRUE;
@@ -486,9 +629,21 @@ class mLeadGeneration extends CI_Model
     public function getCancelLead($id)
     {
         if (!empty($id)) {
-            $data = $this->db->get_where("lead", ['created_by' => $id, 'is_active' => 2])->result();
+            // $data = $this->db->get_where("lead", ['created_by' => $id, 'is_active' => 2])->result();
+            $this->db->select('au.user_name,au.user_id,l.*');
+            $this->db->from('auth_user au', NULL, FALSE);
+            $this->db->join('`lead` `l`', 'au.user_id=l.created_by', NULL, FALSE);
+            $this->db->where('l.is_active', '2');
+            $this->db->where('l.created_by', $id);
+            $data = $this->db->get()->result();
         } else {
-            $data = $this->db->get_where("lead", ['is_active' => 2])->result();
+            // $data = $this->db->get_where("lead", ['is_active' => 2])->result();
+            $this->db->select('au.user_name,au.user_id,l.*');
+            $this->db->from('auth_user au', NULL, FALSE);
+            $this->db->join('`lead` `l`', 'au.user_id=l.created_by', NULL, FALSE);
+            $this->db->where('l.is_active', '2');
+            $data = $this->db->get()->result();
+
         }
         if (!empty($data)) {
             $response['status'] = TRUE;

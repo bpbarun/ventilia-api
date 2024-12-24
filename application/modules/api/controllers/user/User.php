@@ -127,4 +127,37 @@ class User extends REST_Controller
             $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
         }
     }
+    /**
+     * Upload the files from this method
+     * 
+     * @return Response
+     */
+    public function franchises_get($id)
+    {
+        $headerData = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (empty($responseData['error'])) {
+            $response = $this->mUser->getfranchises($id);
+            $this->response($response, REST_Controller::HTTP_OK);
+        } else {
+            $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+    }
+     /**
+     * Upload the files from this method
+     * 
+     * @return Response
+     */
+    public function franchises_post($id)
+    {
+        $headerData = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (empty($responseData['error'])) {
+            $input = $this->post();
+            $response = $this->mUser->savefranchises($id,$input);
+            $this->response($response, REST_Controller::HTTP_OK);
+        } else {
+            $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+    }
 }

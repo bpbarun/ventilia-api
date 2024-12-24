@@ -265,6 +265,19 @@ class LeadGeneration extends REST_Controller
             $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
         }
     }
+    public function getMyGraphData_get($id = 0)
+    {
+        $headerData = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (empty($responseData['error'])) {
+            $response = $this->mLeadGeneration->getMyGraphData($id);
+
+            $this->response($response, REST_Controller::HTTP_OK);
+        } else {
+            $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+    }
+    
     /**
      * Get All Data from this method.
      *

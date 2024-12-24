@@ -62,14 +62,44 @@ class Reimbursement extends REST_Controller
      *
      * @return Response
      */
+    // public function index_post()
+    // {
+    //     $headerData = $this->input->request_headers();
+    //     $responseData = $this->common->authCheck($headerData);
+    //     if (empty($responseData['error'])) {
+    //         $input = $this->post();
+    //         $response = $this->mReimbursement->insertData($input);
+    //         $this->response($response, REST_Controller::HTTP_OK);
+    //     } else {
+    //         $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+    //     }
+    // }
     public function index_post()
     {
         $headerData = $this->input->request_headers();
         $responseData = $this->common->authCheck($headerData);
         if (empty($responseData['error'])) {
             $input = $this->post();
-            $response = $this->mReimbursement->insertData($input);
-            $this->response($response, REST_Controller::HTTP_OK);
+            try {
+                $mediaDirectory = '/var/www/html/lead/';
+                $mediaName = $_FILES["file"]["name"];
+                $indexOFF  = strrpos($mediaName, '.');
+                $nameFile  = substr($mediaName, 0, $indexOFF);
+                $extension = substr($mediaName, $indexOFF);
+                $clean     = preg_replace("([^\w\s\d\-_])", "", $nameFile);
+                $mediaName  = str_replace(' ', '', $clean) . $extension;
+                if (empty($_FILES["file"]["type"]) || !move_uploaded_file($_FILES["file"]["tmp_name"], $mediaDirectory . '/' . $mediaName)) {
+                  
+                }
+                 unset($input['file']);
+                // $input['asset_name'] = $mediaName;
+                // $input['asset_type'] = $_FILES["file"]["type"];
+                $response = $this->mReimbursement->insertData($input);
+                $this->response($response, REST_Controller::HTTP_OK);
+            } catch (Exception $e) {
+                $response = $e->getMessage();
+                $this->response($response, REST_Controller::HTTP_OK);
+            }
         } else {
             $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
         }

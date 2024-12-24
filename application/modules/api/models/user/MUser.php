@@ -107,7 +107,14 @@ class mUser extends CI_Model
         JOIN technial_salesman_relation as r on find_in_set(u.user_id,r.sealesman_id) 
         where r.technical_id = $id";
         $query = $this->db->query($qry);
-        $data  = $query->result();
+        $data2  = $query->result();
+
+        $qry1 =  "SELECT u.user_name,u.user_id from auth_user as u 
+        JOIN teamlead_technical_relation as t on u.user_id=t.teamlead_id
+        where find_in_set($id,t.technical_id)";
+        $query1 = $this->db->query($qry1);
+        $data1  = $query1->result();
+        $data = array_merge($data2, $data1);
         if ($data) {
 
             foreach ($data as $key) {
@@ -122,6 +129,30 @@ class mUser extends CI_Model
             $response['data'] = $data;
         } else {
             $response['error'] = 'No record found';
+        }
+        return $response;
+    }
+    public function getfranchises($id){
+            $qry =  "SELECT au.user_name as label,au.user_id as value, t.is_active from auth_user as au
+            JOIN teamlead_technical_relation as t on find_in_set(au.user_id,t.technical_id) 
+            where t.teamlead_id = $id";
+            $query = $this->db->query($qry);
+            $data  = $query->result();
+        if (!empty($data)) {
+            $response['status'] = TRUE;
+            $response['data'] = $data;
+        } else {
+            $response['error'] = 'No record found';
+        }
+        return $response;
+    }
+    public function savefranchises($id,$input){
+        $data = $this->db->update('teamlead_technical_relation', $input, array('teamlead_id' => $id));
+        if ($this->db->affected_rows() > 0) {
+            $response['status'] = TRUE;
+            $response['data'] = 'Record updated successfully';
+        } else {
+            $response['error'] = 'Getting error please try after some time';
         }
         return $response;
     }
