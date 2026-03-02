@@ -21,7 +21,163 @@ class mLeadGeneration extends CI_Model
         $this->load->database();
         $response = array('status' => FALSE, 'error' => '', 'data' => array(), 'response_tag' => 220);
     }
+    /**
+     * Get All Data from this method.
+     *
+     * @return Response
+     */
+    public function weeklyCompletedLead($id, $from, $to)
+    {
+        if (!empty($id)) {
+            $this->db->select('au.user_name,au.user_id,l.*');
+            $this->db->from('auth_user au', NULL, FALSE);
+            $this->db->join('`lead` `l`', 'au.user_id=l.created_by', NULL, FALSE);
+            $this->db->where('l.is_active', 3);
+            $this->db->where('l.created_by', $id);
+            $this->db->where('DATE(l.created_on) >=', $from);
+            $this->db->where('DATE(l.created_on) <=', $to);
+            $data = $this->db->get()->result();
+            // echo $this->db->last_query();
+        }
+        if (!empty($data)) {
+            $response['status'] = TRUE;
+            $response['data'] = $data;
+        } else {
+            $response['status'] = FALSE;
+            $response['error'] = 'No record found';
+            $response['data'] = [];
 
+        }
+        return $response;
+    }
+    /**
+     * Get All Data from this method.
+     *
+     * @return Response
+     */
+    public function getWeeklyOpportunity($id, $from, $to)
+    {
+        $this->db->select('l.*');
+        $this->db->from('lead l', NULL, FALSE);
+        $this->db->order_by('lead_id', 'DESC');
+        $this->db->where('l.lead_progress >', 1);
+        $this->db->where('l.created_by', $id);
+        $this->db->where('DATE(l.created_on) >=', $from);
+        $this->db->where('DATE(l.created_on) <=', $to);
+        $this->db->where('is_active', 1);
+        $data = $this->db->get()->result();
+        $leadIDs = array();
+        foreach ($data as $key) {
+            array_push($leadIDs, $key->lead_id);
+        }
+        if(!empty($leadIDs)){
+            $this->db->where_in('lead_id', $leadIDs);
+            $this->db->where('is_active', 1);
+            $data1 = $this->db->get("quotation_assets")->result();
+            foreach ($data as $key) {
+                foreach ($data1 as $key1) {
+                    if ($key->lead_id === $key1->lead_id) {
+                        $key->asset_name = $key1->asset_name;
+                        $key->is_active = $key1->is_active;
+                        $key->asset_type = $key1->asset_type;
+                        $key->total_area = $key1->total_area;
+                        $key->total_unit = $key1->total_unit;
+                        $key->average_price = $key1->average_price;
+                    }
+                }
+            }
+            $this->db->where_in('lead_id', $leadIDs);
+            $this->db->where('is_active', 1);
+            $data1 = $this->db->get("offer_details")->result();
+            foreach ($data as $key) {
+                foreach ($data1 as $key1) {
+                    if ($key->lead_id === $key1->lead_id) {
+                        $key->offer_price = $key1->offer_price;
+                        $key->gst = $key1->gst;
+                        $key->freight = $key1->freight;
+                        $key->close_date = $key1->close_date;
+                    }
+                }
+            }
+        }
+        
+        if (!empty($data)) {
+            $response['status'] = TRUE;
+            $response['data'] = $data;
+        } else {
+            $response['error'] = 'No record found';
+            $response['data'] = [];
+        }
+        return $response;
+    }
+    /**
+     * Get All Data from this method.
+     *
+     * @return Response
+     */
+    public function getWeeklySalesReport($id, $from = null, $to = null)
+    {
+        if (!is_numeric($id)) {
+            return [
+                'status' => FALSE,
+                'error'  => 'Invalid user ID'
+            ];
+        }
+
+        // Default current week
+        if (empty($from) || empty($to)) {
+            $from = date('Y-m-d', strtotime('monday this week'));
+            $to   = date('Y-m-d', strtotime('sunday this week'));
+        }
+
+        // ===============================
+        // Get Lead List (existing logic)
+        // ===============================
+        $this->db->where('created_by', $id);
+        $this->db->where('DATE(created_on) >=', $from);
+        $this->db->where('DATE(created_on) <=', $to);
+        $this->db->where('lead_progress >=', 1);
+        $this->db->order_by('created_on', 'DESC');
+
+        $leadData = $this->db->get("lead")->result();
+
+        // ===============================
+        // Get Actual Counts
+        // ===============================
+        $this->db->select("
+            SUM(CASE WHEN lead_progress >= 1 THEN 1 ELSE 0 END) as lead_generated,
+            SUM(CASE WHEN lead_progress > 1 THEN 1 ELSE 0 END) as quotation_generated,
+            SUM(CASE WHEN is_active = 3 THEN 1 ELSE 0 END) as closed_count
+        ");
+
+        $this->db->where('created_by', $id);
+        $this->db->where('DATE(created_on) >=', $from);
+        $this->db->where('DATE(created_on) <=', $to);
+
+        $actualCounts = $this->db->get("lead")->row();
+
+        // ===============================
+        // Get Promise Data
+        // ===============================
+        $this->db->where('created_by', $id);
+        $this->db->where('DATE(created_on) >=', $from);
+        $this->db->where('DATE(created_on) <=', $to);
+
+        $promiseData = $this->db->get("sales_promise")->row();
+
+        return [
+            'status' => TRUE,
+            'leads'  => $leadData ?? [],
+            'summary' => [
+                'promise' => $promiseData ?? null,
+                'actual'  => $actualCounts ?? [
+                    'lead_generated' => 0,
+                    'quotation_generated' => 0,
+                    'closed_count' => 0
+                ]
+            ]
+        ];
+    }
     /**
      * Get All Data from this method.
      *
@@ -96,7 +252,6 @@ class mLeadGeneration extends CI_Model
             $this->db->where('is_active', 1);
             $this->db->where('created_by', $id['created_by']);
             $data = $this->db->get()->result();
-            // echo $this->db->last_query();
             $leadIDs = array();
             foreach ($data as $key) {
                 array_push($leadIDs, $key->lead_id);

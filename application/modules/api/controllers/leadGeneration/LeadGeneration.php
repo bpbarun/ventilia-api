@@ -39,6 +39,70 @@ class LeadGeneration extends REST_Controller
      *
      * @return Response
      */
+    public function getWeeklyCompletedLead_post($id = 0)
+    {
+        $headerData   = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (!empty($responseData['error'])) {
+            return $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+        if (empty($id)) {
+            $id = $responseData['data']['id'];
+        }
+        $input = $this->post();
+        $from = $input['from'];
+        $to   = $input['to'];
+        $response = $this->mLeadGeneration->weeklyCompletedLead($id, $from, $to);
+        return $this->response($response, REST_Controller::HTTP_OK);
+    }
+    /**
+     * Get All Opportunity Data from this method.
+     *
+     * @return Response
+     */
+    public function getWeeklyOpportunity_post($id = 0)
+    {
+        $headerData   = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (!empty($responseData['error'])) {
+            return $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+        if (empty($id)) {
+            $id = $responseData['data']['id'];
+        }
+        $input = $this->post();
+        $from = $input['from'];
+        $to   = $input['to'];
+        $response = $this->mLeadGeneration->getWeeklyOpportunity($id, $from, $to);
+        return $this->response($response, REST_Controller::HTTP_OK);
+    }
+    /**
+     * Get All Data from this method.
+     *
+     * @return Response
+     */
+    public function weeklySalesReport_post($id = 0)
+    {
+        $headerData   = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (!empty($responseData['error'])) {
+            return $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+        if (empty($id)) {
+            $id = $responseData['data']['id'];
+        }
+        $input = $this->post();
+        $from = $input['from'];
+        $to   = $input['to'];
+        $response = $this->mLeadGeneration->getWeeklySalesReport($id, $from, $to);
+        return $this->response($response, REST_Controller::HTTP_OK);
+    }
+
+    /**
+     * Get All Data from this method.
+     *
+     * @return Response
+     */
     public function index_get($id = 0)
     {
 

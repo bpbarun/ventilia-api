@@ -1,6 +1,8 @@
 <?php
 
+header("Access-Control-Allow-Headers: *");
 header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Methods: *");
 
 /**
  * This class is used for Crud operation over report 
