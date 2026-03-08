@@ -50,6 +50,30 @@ class mLeadGeneration extends CI_Model
         }
         return $response;
     }
+    
+    public function getWeeklyFollowup($id, $from, $to)
+    {
+        if (!empty($id)) {
+            $this->db->select('f.*');
+            $this->db->from('follow_ups as f', NULL, FALSE);
+            $this->db->where('f.assigned_to', $id);
+            $this->db->where('f.status', 'completed');
+            $this->db->where('DATE(f.followup_date) >=', $from);
+            $this->db->where('DATE(f.followup_date) <=', $to);
+            $data = $this->db->get()->result();
+            // echo $this->db->last_query();
+        }
+        if (!empty($data)) {
+            $response['status'] = TRUE;
+            $response['data'] = $data;
+        } else {
+            $response['status'] = FALSE;
+            $response['error'] = 'No record found';
+            $response['data'] = [];
+
+        }
+        return $response;
+    }
     /**
      * Get All Data from this method.
      *

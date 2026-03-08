@@ -98,6 +98,28 @@ class LeadGeneration extends REST_Controller
         return $this->response($response, REST_Controller::HTTP_OK);
     }
 
+     /**
+     * Get All Opportunity Data from this method.
+     *
+     * @return Response
+     */
+    public function getWeeklyFollowup_post($id = 0)
+    {
+        $headerData   = $this->input->request_headers();
+        $responseData = $this->common->authCheck($headerData);
+        if (!empty($responseData['error'])) {
+            return $this->response($responseData, REST_Controller::HTTP_UNAUTHORIZED);
+        }
+        if (empty($id)) {
+            $id = $responseData['data']['id'];
+        }
+        $input = $this->post();
+        $from = $input['from'];
+        $to   = $input['to'];
+        $response = $this->mLeadGeneration->getWeeklyFollowup($id, $from, $to);
+        return $this->response($response, REST_Controller::HTTP_OK);
+    }
+
     /**
      * Get All Data from this method.
      *
