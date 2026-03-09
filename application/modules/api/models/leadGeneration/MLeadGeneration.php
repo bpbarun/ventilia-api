@@ -506,7 +506,7 @@ class mLeadGeneration extends CI_Model
             $this->db->select('au.user_name,au.user_id,l.lead_id,l.is_active,l.lead_progress');
             $this->db->from('auth_user au', NULL, FALSE);
             $this->db->join('`lead` `l`', 'au.user_id=l.created_by', NULL, FALSE);
-            $this->db->where('au.user_role', 'sealseman');
+            $this->db->where_in('au.user_role', array('sealseman','sealseman_teamlead'));
             $this->db->order_by('au.user_id', 'ASC');
             $data = $this->db->get()->result();
             // echo "inside else".$this->db->last_query();
